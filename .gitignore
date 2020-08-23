@@ -1,0 +1,6 @@
+*.pyc
+/dist/*
+/*.egg-info/*
+/garden_frontend/build/*
+/garden_frontend/node_modules/*
+/garden_frontend/yarn.lock
