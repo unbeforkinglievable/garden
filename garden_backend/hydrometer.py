@@ -62,6 +62,8 @@ def main():
         while True:
             print(hydrometer.poll())
             time.sleep(1.0)
+    except OSError:
+        logger.error('Sensor not available; plugged in and powered?')
     except KeyboardInterrupt:
         logger.info('Goodbye')
     finally:
