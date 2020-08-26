@@ -7,12 +7,10 @@
 import time
 import struct
 
+
 from abc import ABCMeta, abstractmethod
 
-import logging
-
-logger = logging.getLogger('hydrometer')
-logger.setLevel(logging.DEBUG)
+from .utils import setup_logger
 
 class AdcAddress:
     '''@brief ADS1015 possible 7-bit I2C addresses
@@ -81,6 +79,7 @@ class Adc(object, metaclass=ABCMeta):
         '''
         self._bus = bus
         self._address = address
+        self._logger = setup_logger()
 
     def write_register(self, register, value):
         '''@brief write a 16-bit (big-endian) value to the desired register
@@ -92,7 +91,7 @@ class Adc(object, metaclass=ABCMeta):
         '''
         raw = self._read_register_raw(register)
         value = struct.unpack('>H', raw)[0]
-        logger.error('Raw: %04X' % value)
+        self._logger.debug('Raw: 0x%04X' % value)
         return value
 
     @abstractmethod
@@ -119,7 +118,7 @@ class Adc(object, metaclass=ABCMeta):
         self.write_register(AdcRegister.CONFIG, config)
         time.sleep(0.001)
         raw_adc = self.read_register(AdcRegister.CONVERSION) >> 4
-        logger.error('Raw: 0x%04X' % raw_adc)
+        self._logger.debug('Raw: 0x%04X' % raw_adc)
         if raw_adc & 0x800:
             # this is a negative number
             signed_result = raw_adc - 0x1000

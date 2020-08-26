@@ -1,14 +1,12 @@
 '''@brief I2C Module
 '''
 import os
-import logging
 import binascii
 import threading
 
 from abc import ABCMeta, abstractmethod
 
-logger = logging.getLogger('i2c')
-logger.setLevel(logging.DEBUG)
+from .utils import setup_logger
 
 class I2cBus:
     BUS0 = 0
@@ -22,6 +20,7 @@ class I2c(object, metaclass=ABCMeta):
         '''
         self._id = bus_id
         self._lock = threading.RLock()
+        self._logger = setup_logger()
 
     def write_read(self, address, register, write_data, read_length):
         '''@brief write and then read bytes to/from the desired address on the i2c bus
@@ -34,22 +33,22 @@ class I2c(object, metaclass=ABCMeta):
         '''@brief write bytes to the desired address on the i2c bus
         '''
         with self._lock:
-            logger.debug('Writing 0x%02X:0x%02X 0x%s' % (address, register, binascii.hexlify(data)))
+            self._logger.debug('Writing 0x%02X:0x%02X 0x%s' % (address, register, binascii.hexlify(data).decode()))
             self._write(address, register, data)
 
     def read(self, address, register, length):
         '''@brief read bytes from the desired address on the i2c bus
         '''
         with self._lock:
-            logger.error('Reading 0x%02X:0x%02X' % (address, register))
+            self._logger.debug('Reading 0x%02X:0x%02X' % (address, register))
             data = self._read(address, register, length)
-        logger.error('Read 0x%s' % binascii.hexlify(data))
+        self._logger.debug('Read 0x%s' % binascii.hexlify(data).decode())
         return data
 
     def close(self):
         '''@brief cleanly close the device
         '''
-        logger.debug('Closing')
+        self._logger.debug('Closing')
         self._close()
 
     @abstractmethod
