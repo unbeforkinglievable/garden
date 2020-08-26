@@ -22,6 +22,7 @@ class Hydrometer(object):
            @note this should return a number between 0.0 and 100.0 (it's a percentage)
         '''
         voltage = self._adc.read_single(self._channel)
+        logger.error('Voltage: %s' % str(voltage))
 
         # this voltage should now be between 0.0 and 3.0V as that's the output range of the sensor
         if voltage < 0 or voltage > 3.0:
@@ -55,7 +56,7 @@ def main():
     import time
 
     i2c = I2c(I2cBus.BUS1)
-    adc = Adc(i2c, AdcAddress.ADDR0)
+    adc = Adc(i2c, AdcAddress.ADDR2)
     hydrometer = Hydrometer(adc, AdcChannel.CHANNEL0)
 
     try:
@@ -64,6 +65,7 @@ def main():
             time.sleep(1.0)
     except OSError:
         logger.error('Sensor not available; plugged in and powered?')
+        raise
     except KeyboardInterrupt:
         logger.info('Goodbye')
     finally:

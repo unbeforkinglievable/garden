@@ -84,7 +84,7 @@ class RaspberryI2c(I2c):
         self._bus.write_i2c_block_data(address, register, data[1:])
 
     def _read(self, address, register, length):
-        return bytes(self._bus.read_i2C_block_data(address, register, length))
+        return bytes(self._bus.read_i2c_block_data(address, register, length))
 
     def _close(self):
         self._bus.close()

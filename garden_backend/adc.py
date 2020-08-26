@@ -9,6 +9,11 @@ import struct
 
 from abc import ABCMeta, abstractmethod
 
+import logging
+
+logger = logging.getLogger('hydrometer')
+logger.setLevel(logging.DEBUG)
+
 class AdcAddress:
     '''@brief ADS1015 possible 7-bit I2C addresses
     '''
@@ -87,6 +92,7 @@ class Adc(object, metaclass=ABCMeta):
         '''
         raw = self._read_register_raw(register)
         value = struct.unpack('>H', raw)[0]
+        logger.error('Raw: %04X' % value)
         return value
 
     @abstractmethod
@@ -138,7 +144,7 @@ class RaspberryAdc(Adc):
         super(RaspberryAdc, self).__init__(bus, address)
 
     def _read_register_raw(self, register):
-        self._bus.read(self._address, register, 2)
+        return self._bus.read(self._address, register, 2)
 
 class LinuxAdc(Adc):
     '''@brief Linux version fo testing that plays a ramp of readings
@@ -175,5 +181,5 @@ class LinuxAdc(Adc):
             return result
         # we're reading a static register; let's report what is in the cache if we can
         if register not in self._register_cache:
-            return 0
+            return struct.pack('<H', 0)
         return self._register_cache[register]
