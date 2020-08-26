@@ -41,9 +41,9 @@ class I2c(object, metaclass=ABCMeta):
         '''@brief read bytes from the desired address on the i2c bus
         '''
         with self._lock:
-            logger.debug('Reading 0x%02X:0x%02X' % (address, register))
+            logger.error('Reading 0x%02X:0x%02X' % (address, register))
             data = self._read(address, register, length)
-        logger.debug('Read 0x%s' % binascii.hexlify(data))
+        logger.error('Read 0x%s' % binascii.hexlify(data))
         return data
 
     def close(self):

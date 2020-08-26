@@ -119,6 +119,7 @@ class Adc(object, metaclass=ABCMeta):
         self.write_register(AdcRegister.CONFIG, config)
         time.sleep(0.001)
         raw_adc = self.read_register(AdcRegister.CONVERSION) >> 4
+        logger.error('Raw: 0x%04X' % raw_adc)
         if raw_adc & 0x800:
             # this is a negative number
             signed_result = raw_adc - 0x1000
