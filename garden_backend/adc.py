@@ -61,6 +61,7 @@ class AdcConfigRegister:
     PGA_V0P256 = 0x0A00
 
     # what mode we want (continuous/single)
+    MODE_CONTINUOUS  = 0x0000
     MODE_SINGLE_SHOT = 0x0100 # << this is what we want
 
     # what sampling rate
@@ -69,7 +70,8 @@ class AdcConfigRegister:
     COMP_MODE_WINDOW     = 0x0010 # << we don't want this
     COMP_POL_ACTIVE_HIGH = 0x0008 # << we don't want this
     COMP_LAT_LATCH       = 0x0004 # << we don't want this
-    COMP_QUEUE_DISABLE   = 0x0003
+    COMP_QUEUE_ONE       = 0x0000
+    COMP_QUEUE_DISABLE   = 0x0003 # << we want this
 
 class Adc(object, metaclass=ABCMeta):
     '''@brief ADC class for the ADS1015
@@ -116,7 +118,7 @@ class Adc(object, metaclass=ABCMeta):
         config |= ((channel + 4) << 12)
 
         self.write_register(AdcRegister.CONFIG, config)
-        time.sleep(0.001)
+        time.sleep(0.001) # at 1600SPS, this should take < 1ms
         raw_adc = self.read_register(AdcRegister.CONVERSION) >> 4
         self._logger.debug('Raw: 0x%04X' % raw_adc)
         if raw_adc & 0x800:

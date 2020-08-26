@@ -37,8 +37,8 @@ def create_app(test_config=None):
     # )
 
     i2c = I2c(I2cBus.BUS1)
-    adc = Adc(i2c, AdcAddress.ADDR0)
-    hydrometer = Hydrometer(adc, AdcChannel.CHANNEL0)
+    adc = Adc(i2c, AdcAddress.ADDR2)
+    hydrometer = Hydrometer(adc, AdcChannel.CHANNEL3)
 
     # db = X()
 

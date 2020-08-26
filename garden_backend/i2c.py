@@ -80,7 +80,7 @@ class RaspberryI2c(I2c):
         self._bus = SMBus(bus='/dev/i2c-%d' % bus_id)
 
     def _write(self, address, register, data):
-        self._bus.write_i2c_block_data(address, register, data[1:])
+        self._bus.write_i2c_block_data(address, register, data)
 
     def _read(self, address, register, length):
         return bytes(self._bus.read_i2c_block_data(address, register, length))

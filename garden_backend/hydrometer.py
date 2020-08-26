@@ -61,12 +61,12 @@ def main():
     logging.getLogger().setLevel(logging.DEBUG if args.verbose else logging.INFO)
     i2c = I2c(I2cBus.BUS1)
     adc = Adc(i2c, AdcAddress.ADDR2)
-    hydrometer = Hydrometer(adc, AdcChannel.CHANNEL0)
+    hydrometer = Hydrometer(adc, AdcChannel.CHANNEL3)
 
     try:
         while True:
             hydrometer._logger.info('VMC: %1.2f%%' % hydrometer.poll())
-            time.sleep(1.0)
+            time.sleep(2.0)
     except OSError:
         hydrometer._logger.error('Sensor not available; plugged in and powered?')
         raise
