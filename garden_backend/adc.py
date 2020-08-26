@@ -7,7 +7,10 @@
 import time
 import struct
 
+
 from abc import ABCMeta, abstractmethod
+
+from .utils import setup_logger
 
 class AdcAddress:
     '''@brief ADS1015 possible 7-bit I2C addresses
@@ -58,6 +61,7 @@ class AdcConfigRegister:
     PGA_V0P256 = 0x0A00
 
     # what mode we want (continuous/single)
+    MODE_CONTINUOUS  = 0x0000
     MODE_SINGLE_SHOT = 0x0100 # << this is what we want
 
     # what sampling rate
@@ -66,7 +70,8 @@ class AdcConfigRegister:
     COMP_MODE_WINDOW     = 0x0010 # << we don't want this
     COMP_POL_ACTIVE_HIGH = 0x0008 # << we don't want this
     COMP_LAT_LATCH       = 0x0004 # << we don't want this
-    COMP_QUEUE_DISABLE   = 0x0003
+    COMP_QUEUE_ONE       = 0x0000
+    COMP_QUEUE_DISABLE   = 0x0003 # << we want this
 
 class Adc(object, metaclass=ABCMeta):
     '''@brief ADC class for the ADS1015
@@ -76,6 +81,7 @@ class Adc(object, metaclass=ABCMeta):
         '''
         self._bus = bus
         self._address = address
+        self._logger = setup_logger()
 
     def write_register(self, register, value):
         '''@brief write a 16-bit (big-endian) value to the desired register
@@ -87,6 +93,7 @@ class Adc(object, metaclass=ABCMeta):
         '''
         raw = self._read_register_raw(register)
         value = struct.unpack('>H', raw)[0]
+        self._logger.debug('Raw: 0x%04X' % value)
         return value
 
     @abstractmethod
@@ -111,8 +118,9 @@ class Adc(object, metaclass=ABCMeta):
         config |= ((channel + 4) << 12)
 
         self.write_register(AdcRegister.CONFIG, config)
-        time.sleep(0.001)
+        time.sleep(0.001) # at 1600SPS, this should take < 1ms
         raw_adc = self.read_register(AdcRegister.CONVERSION) >> 4
+        self._logger.debug('Raw: 0x%04X' % raw_adc)
         if raw_adc & 0x800:
             # this is a negative number
             signed_result = raw_adc - 0x1000
@@ -138,7 +146,7 @@ class RaspberryAdc(Adc):
         super(RaspberryAdc, self).__init__(bus, address)
 
     def _read_register_raw(self, register):
-        self._bus.read(self._address, register, 2)
+        return self._bus.read(self._address, register, 2)
 
 class LinuxAdc(Adc):
     '''@brief Linux version fo testing that plays a ramp of readings
@@ -175,5 +183,5 @@ class LinuxAdc(Adc):
             return result
         # we're reading a static register; let's report what is in the cache if we can
         if register not in self._register_cache:
-            return 0
+            return struct.pack('<H', 0)
         return self._register_cache[register]
